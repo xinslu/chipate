@@ -1,3 +1,4 @@
+use crate::font::FONT_SET;
 const CHIP8_WIDTH: usize = 64;
 const CHIP8_HEIGHT: usize = 32;
 const CHIP8_RAM: usize = 4096;
@@ -27,7 +28,7 @@ impl Processor {
         Processor {
             vram: [[0; CHIP8_WIDTH]; CHIP8_HEIGHT],
             vram_changed: false,
-            ram: ram,
+            ram,
             stack: [0; 16],
             v: [0; 16],
             i: 0,
