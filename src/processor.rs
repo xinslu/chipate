@@ -7,7 +7,7 @@ pub struct Processor {
     vram_changed: bool,
     ram: [u8; CHIP8_RAM],
     stack: [usize; 16],
-    v: [u8; 16],
+    registers: [u8; 16],
     i: usize,
     pc: usize,
     sp: usize,
@@ -30,7 +30,7 @@ impl Processor {
             vram_changed: false,
             ram,
             stack: [0; 16],
-            v: [0; 16],
+            registers: [0; 16],
             i: 0,
             pc: 0x200,
             sp: 0,
@@ -39,6 +39,17 @@ impl Processor {
             keypad: [false; 16],
             keypad_waiting: false,
             keypad_register: 0,
+        }
+    }
+
+    pub fn load(&mut self, data: &[u8]) {
+        for (i, &byte) in data.iter().enumerate() {
+            let addr = 0x200 + i;
+            if addr < 4096 {
+                self.ram[0x200 + i] = byte;
+            } else {
+                break;
+            }
         }
     }
 }
