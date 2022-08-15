@@ -4,7 +4,6 @@ const CHIP8_HEIGHT: usize = 32;
 const CHIP8_RAM: usize = 4096;
 pub struct Processor {
     vram: [[u8; CHIP8_WIDTH]; CHIP8_HEIGHT],
-    vram_changed: bool,
     ram: [u8; CHIP8_RAM],
     stack: [usize; 16],
     registers: [u8; 16],
@@ -18,6 +17,12 @@ pub struct Processor {
     keypad_register: usize,
 }
 
+enum ProgramCounter {
+    Next,
+    Skip,
+    Jump(usize),
+}
+
 impl Processor {
     pub fn new() -> Self {
         let mut ram = [0u8; CHIP8_RAM];
@@ -27,7 +32,6 @@ impl Processor {
 
         Processor {
             vram: [[0; CHIP8_WIDTH]; CHIP8_HEIGHT],
-            vram_changed: false,
             ram,
             stack: [0; 16],
             registers: [0; 16],
@@ -51,5 +55,21 @@ impl Processor {
                 break;
             }
         }
+    }
+
+    // CLS: Clear Display
+    fn OP00E0(&mut self) -> ProgramCounter {
+        for y in 0..CHIP8_HEIGHT {
+            for x in 0..CHIP8_WIDTH {
+                self.vram[y][x] = 0;
+            }
+        }
+        ProgramCounter::Next
+    }
+
+    // RET
+    fn OP00EE(&mut self) -> ProgramCounter {
+        self.sp -= 1;
+        ProgramCounter::Jump(self.stack[self.sp])
     }
 }
