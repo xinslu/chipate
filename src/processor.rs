@@ -2,6 +2,7 @@ use crate::font::FONT_SET;
 const CHIP8_WIDTH: usize = 64;
 const CHIP8_HEIGHT: usize = 32;
 const CHIP8_RAM: usize = 4096;
+const OPCODE_SIZE: usize = 2;
 pub struct Processor {
     vram: [[u8; CHIP8_WIDTH]; CHIP8_HEIGHT],
     ram: [u8; CHIP8_RAM],
@@ -57,7 +58,7 @@ impl Processor {
         }
     }
 
-    // CLS: Clear Display
+    // CLS
     fn OP00E0(&mut self) -> ProgramCounter {
         for y in 0..CHIP8_HEIGHT {
             for x in 0..CHIP8_WIDTH {
@@ -71,5 +72,26 @@ impl Processor {
     fn OP00EE(&mut self) -> ProgramCounter {
         self.sp -= 1;
         ProgramCounter::Jump(self.stack[self.sp])
+    }
+
+    // JMP
+    fn OP1NNN(&mut self, nnn: usize) -> ProgramCounter {
+        ProgramCounter::Jump(nnn)
+    }
+
+    // CALL
+    fn OP2NNN(&mut self, nnn: usize) -> ProgramCounter {
+        self.stack[self.sp] = self.pc + OPCODE_SIZE;
+        self.sp += 1;
+        ProgramCounter::Jump(nnn)
+    }
+
+    // SE
+    fn OP3XKK(&mut self, x: usize, kk: u8) -> ProgramCounter {
+        if self.registers[x] == kk {
+            return ProgramCounter::Skip;
+        } else {
+            return ProgramCounter::Next;
+        };
     }
 }
